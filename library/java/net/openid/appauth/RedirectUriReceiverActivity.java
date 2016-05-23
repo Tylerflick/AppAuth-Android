@@ -53,7 +53,7 @@ public class RedirectUriReceiverActivity extends Activity {
     public void onCreate(Bundle savedInstanceBundle) {
         super.onCreate(savedInstanceBundle);
         Intent intent = getIntent();
-        Uri data = intent.getData();
+        UriParser data = new UriParser(intent.getData());
         String state = data.getQueryParameter(KEY_STATE);
         AuthorizationRequest request = PendingIntentStore.getInstance().getOriginalRequest(state);
         PendingIntent target = PendingIntentStore.getInstance().getPendingIntent(state);

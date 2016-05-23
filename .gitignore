@@ -6,3 +6,4 @@ library/build
 .idea/*
 *.iml
 appauth.keystore
+*DS_Store
