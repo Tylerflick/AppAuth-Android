@@ -14,6 +14,7 @@
 
 package net.openid.appauth;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -32,7 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayInputStream;
@@ -47,8 +48,8 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE)
+@RunWith(RobolectricGradleTestRunner.class)
+@Config(constants = BuildConfig.class)
 public class AuthorizationServiceConfigurationTest {
     private static final int CALLBACK_TIMEOUT_MILLIS = 1000;
     private static final String TEST_NAME = "test_name";
@@ -165,6 +166,28 @@ public class AuthorizationServiceConfigurationTest {
         assertEquals(TEST_AUTH_ENDPOINT, config.authorizationEndpoint.toString());
         assertEquals(TEST_TOKEN_ENDPOINT, config.tokenEndpoint.toString());
         assertEquals(TEST_REGISTRATION_ENDPOINT, config.registrationEndpoint.toString());
+    }
+
+    @Test
+    public void testBuildConfigurationUriFromIssuer() {
+        Uri issuerUri = Uri.parse("https://test.openid.com");
+        assertThat(AuthorizationServiceConfiguration.buildConfigurationUriFromIssuer(issuerUri))
+                .isEqualTo(TEST_DISCOVERY_URI);
+    }
+
+    @Test
+    public void testBuildConfigurationUriFromIssuer_withRootPath() {
+        Uri issuerUri = Uri.parse("https://test.openid.com/");
+        assertThat(AuthorizationServiceConfiguration.buildConfigurationUriFromIssuer(issuerUri))
+                .isEqualTo(TEST_DISCOVERY_URI);
+    }
+
+    @Test
+    public void testBuildConfigurationUriFromIssuer_withExtendedPath() {
+        Uri issuerUri = Uri.parse("https://test.openid.com/tenant1");
+        assertThat(AuthorizationServiceConfiguration.buildConfigurationUriFromIssuer(issuerUri))
+                .isEqualTo(Uri.parse(
+                        "https://test.openid.com/tenant1/.well-known/openid-configuration"));
     }
 
     @Test
