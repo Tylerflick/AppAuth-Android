@@ -14,6 +14,15 @@
 
 package net.openid.appauth;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.annotation.Config;
+
+import java.util.Collections;
+
 import static net.openid.appauth.TestValues.TEST_ACCESS_TOKEN;
 import static net.openid.appauth.TestValues.TEST_AUTH_CODE;
 import static net.openid.appauth.TestValues.TEST_CLIENT_SECRET;
@@ -35,17 +44,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.robolectric.RobolectricGradleTestRunner;
-import org.robolectric.annotation.Config;
-
-import java.util.Collections;
-
 @RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class)
+@Config(constants = BuildConfig.class, sdk=16)
 public class AuthStateTest {
 
     private static final Long ONE_SECOND = 1000L;
@@ -75,7 +75,7 @@ public class AuthStateTest {
         assertThat(state.getScope()).isNull();
         assertThat(state.getScopeSet()).isNull();
 
-        assertThat(state.getNeedsTokenRefresh(mClock)).isFalse();
+        assertThat(state.getNeedsTokenRefresh(mClock)).isTrue();
     }
 
     @Test
@@ -97,7 +97,7 @@ public class AuthStateTest {
         assertThat(state.getScope()).isEqualTo(authCodeRequest.scope);
         assertThat(state.getScopeSet()).isEqualTo(authCodeRequest.getScopeSet());
 
-        assertThat(state.getNeedsTokenRefresh(mClock)).isFalse();
+        assertThat(state.getNeedsTokenRefresh(mClock)).isTrue();
     }
 
     @Test
@@ -119,7 +119,7 @@ public class AuthStateTest {
 
         assertThat(state.getScope()).isNull();
         assertThat(state.getScopeSet()).isNull();
-        assertThat(state.getNeedsTokenRefresh(mClock)).isFalse();
+        assertThat(state.getNeedsTokenRefresh(mClock)).isTrue();
     }
 
     @Test
@@ -178,7 +178,7 @@ public class AuthStateTest {
 
         assertThat(state.getScope()).isNull();
         assertThat(state.getScopeSet()).isNull();
-        assertThat(state.getNeedsTokenRefresh(mClock)).isFalse();
+        assertThat(state.getNeedsTokenRefresh(mClock)).isTrue();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -395,17 +395,6 @@ public class AuthStateTest {
         // ... force a refresh
         state.setNeedsTokenRefresh(true);
         assertThat(state.getNeedsTokenRefresh(mClock)).isTrue();
-    }
-
-    @Test
-    public void testSetNeedsTokenRefresh_hasNoEffectWithNoAccessToken() {
-        AuthState state = new AuthState(getTestAuthResponse(), null);
-
-        // in this scenario, we do not yet have a refresh or access token. Attempting to force
-        // a token refresh is meaningless.
-        assertThat(state.getNeedsTokenRefresh()).isFalse();
-        state.setNeedsTokenRefresh(true);
-        assertThat(state.getNeedsTokenRefresh()).isFalse();
     }
 
     @Test
